@@ -4,12 +4,9 @@ namespace Fcg.Web.Services.Checkout;
 
 public interface ICheckoutService
 {
-    Task<CompraAceitaResponseDto> AdquirirAsync(string jogoId);
+    Task<CompraAceitaResponseDto> AdquirirAsync(string jogoId,
+    CancellationToken cancellationToken = default);
 
-    Task<PedidoResponseDto> ObterPedidoAsync(string orderId);
-
-    Task<string> CriarCheckoutMercadoPagoAsync(
-    string orderId,
-    string gameId,
-    decimal price);
+    Task<PedidoResponseDto> ObterPedidoAsync(string orderId,
+    CancellationToken cancellationToken = default);
 }

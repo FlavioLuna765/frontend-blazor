@@ -1,5 +1,4 @@
 ﻿using Fcg.Web.DTOs.Catalogo;
-using Microsoft.AspNetCore.Components.Forms;
 
 namespace Fcg.Web.Services.AdminJogos;
 
@@ -16,9 +15,5 @@ public interface IAdminJogosService
 
     Task DesativarAsync(
         string id,
-        CancellationToken cancellationToken = default);
-
-    Task<string> UploadImagemAsync(
-        IBrowserFile arquivo,
         CancellationToken cancellationToken = default);
 }

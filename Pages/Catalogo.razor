@@ -104,18 +104,7 @@ else
             {
                 <article class="game-card">
 
-                    <div class="game-cover">
-                        @if (!string.IsNullOrWhiteSpace(jogo.ImagemUrl))
-                        {
-                            <img src="@jogo.ImagemUrl"
-                                alt="@($"Capa de {jogo.Titulo}")"
-                                loading="lazy" />
-                        }
-                        else
-                        {
-                            <span class="game-cover-placeholder">🎮</span>
-                        }
-                    </div>
+                    <div class="game-cover"><span class="game-cover-placeholder">🎮</span></div>
 
                     <div class="game-info">
 
@@ -156,7 +145,6 @@ else
 
 @code {
 private readonly List<JogoResponseDto> _jogos = [];
-
 
 private bool _carregando;
 private string? _erro;
@@ -236,6 +224,5 @@ private void AbrirDetalhes(string id)
 {
     Navigation.NavigateTo($"/catalogo/{id}");
 }
-
 
 }

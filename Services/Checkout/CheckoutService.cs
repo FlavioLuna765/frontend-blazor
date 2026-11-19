@@ -1,164 +1,59 @@
 ﻿using System.Net.Http.Json;
 using Fcg.Web.DTOs.Checkout;
-using Fcg.Web.Services.Usuario;
 
 namespace Fcg.Web.Services.Checkout;
 
 public sealed class CheckoutService : ICheckoutService
 {
     private readonly HttpClient _httpClient;
-    private readonly HttpClient _paymentsClient;
-    private readonly IUsuarioAtualService _usuarioAtualService;
 
-    public CheckoutService(
-        HttpClient httpClient,
-        HttpClient paymentsClient,
-        IUsuarioAtualService usuarioAtualService)
+    public CheckoutService(HttpClient httpClient)
     {
         _httpClient = httpClient;
-        _paymentsClient = paymentsClient;
-        _usuarioAtualService = usuarioAtualService;
     }
 
-    public async Task<CompraAceitaResponseDto> AdquirirAsync(string jogoId)
+    public async Task<CompraAceitaResponseDto> AdquirirAsync(
+        string jogoId,
+        CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrWhiteSpace(jogoId))
+            throw new ArgumentException(
+                "O identificador do jogo é obrigatório.",
+                nameof(jogoId));
+
         var request = new AdquirirJogoRequestDto(jogoId);
 
         using var response = await _httpClient.PostAsJsonAsync(
             "api/v1/biblioteca",
-            request);
+            request,
+            cancellationToken);
 
-        if (!response.IsSuccessStatusCode)
-        {
-            var mensagem = await response.Content.ReadAsStringAsync();
-
-            if (string.IsNullOrWhiteSpace(mensagem))
-            {
-                mensagem = $"A API retornou HTTP {(int)response.StatusCode} ({response.StatusCode}).";
-            }
-
-            throw new InvalidOperationException(mensagem);
-        }
+        response.EnsureSuccessStatusCode();
 
         var resultado = await response.Content
-            .ReadFromJsonAsync<CompraAceitaResponseDto>();
+            .ReadFromJsonAsync<CompraAceitaResponseDto>(
+                cancellationToken: cancellationToken);
 
-        return resultado
-            ?? throw new InvalidOperationException(
-                "A API não retornou os dados da compra.");
+        return resultado ?? throw new InvalidOperationException(
+            "A API não retornou os dados do pedido.");
     }
 
-    public async Task<PedidoResponseDto> ObterPedidoAsync(string orderId)
+    public async Task<PedidoResponseDto> ObterPedidoAsync(
+        string orderId,
+        CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(orderId))
-        {
-            throw new InvalidOperationException(
-                "O identificador do pedido não foi informado.");
-        }
+            throw new ArgumentException(
+                "O identificador do pedido é obrigatório.",
+                nameof(orderId));
 
-        using var response = await _httpClient.GetAsync(
-            $"api/v1/pedidos/{Uri.EscapeDataString(orderId)}");
+        var id = Uri.EscapeDataString(orderId);
 
-        if (!response.IsSuccessStatusCode)
-        {
-            var mensagem = await response.Content.ReadAsStringAsync();
+        var pedido = await _httpClient.GetFromJsonAsync<PedidoResponseDto>(
+            $"api/v1/pedidos/{id}",
+            cancellationToken);
 
-            if (string.IsNullOrWhiteSpace(mensagem))
-            {
-                mensagem = $"Não foi possível consultar o pedido. HTTP {(int)response.StatusCode} ({response.StatusCode}).";
-            }
-
-            throw new InvalidOperationException(mensagem);
-        }
-
-        return await response.Content.ReadFromJsonAsync<PedidoResponseDto>()
-            ?? throw new InvalidOperationException(
-                "A API não retornou os dados do pedido.");
-    }
-
-    public async Task<string> CriarCheckoutMercadoPagoAsync(
-        string orderId,
-        string gameId,
-        decimal price)
-    {
-        // O pedido é consultado na API de catálogo usando o cliente autenticado.
-        var pedido = await ObterPedidoAsync(orderId);
-
-        // O usuário da sessão deve corresponder ao proprietário do pedido.
-        var usuarioId = _usuarioAtualService.ObterId();
-
-        if (string.IsNullOrWhiteSpace(usuarioId))
-        {
-            throw new InvalidOperationException(
-                "Sua sessão não possui um usuário autenticado válido. Entre novamente.");
-        }
-
-        if (!string.Equals(
-                pedido.UserId,
-                usuarioId,
-                StringComparison.Ordinal))
-        {
-            throw new InvalidOperationException(
-                "O pedido consultado não pertence ao usuário autenticado.");
-        }
-
-        if (!string.Equals(
-                pedido.GameId,
-                gameId,
-                StringComparison.Ordinal))
-        {
-            throw new InvalidOperationException(
-                "O jogo informado não corresponde ao jogo registrado no pedido.");
-        }
-
-        if (pedido.Preco <= 0)
-        {
-            throw new InvalidOperationException(
-                "O pedido possui um preço inválido.");
-        }
-
-        // O backend de catálogo é a fonte dos dados usados no pagamento.
-        var request = new CheckoutMercadoPagoRequest(
-            pedido.OrderId,
-            pedido.UserId,
-            pedido.GameId,
-            pedido.Preco);
-
-        using var response = await _paymentsClient.PostAsJsonAsync(
-            "api/v1/payments/checkout",
-            request);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var mensagem = await response.Content.ReadAsStringAsync();
-
-            if (string.IsNullOrWhiteSpace(mensagem))
-            {
-                mensagem = $"A API de pagamentos retornou HTTP {(int)response.StatusCode} ({response.StatusCode}).";
-            }
-
-            throw new InvalidOperationException(
-                $"Não foi possível criar o checkout no Mercado Pago: {mensagem}");
-        }
-
-        var resultado = await response.Content
-            .ReadFromJsonAsync<CheckoutMercadoPagoResponse>();
-
-        if (string.IsNullOrWhiteSpace(resultado?.CheckoutUrl))
-        {
-            throw new InvalidOperationException(
-                "A API de pagamentos não retornou a URL do checkout.");
-        }
-
-        return resultado.CheckoutUrl;
+        return pedido ?? throw new InvalidOperationException(
+            "A API não retornou os dados do pedido.");
     }
 }
-
-public sealed record CheckoutMercadoPagoRequest(
-    string OrderId,
-    string UserId,
-    string GameId,
-    decimal Price);
-
-public sealed record CheckoutMercadoPagoResponse(
-    string CheckoutUrl);

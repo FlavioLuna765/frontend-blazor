@@ -1,7 +1,10 @@
-﻿@using Fcg.Web.Services.Carrinho
+@using Fcg.Web.Services.Carrinho
 @using Fcg.Web.Services.Auth
 @implements IDisposable
 
+@inject IAuthService AuthService
+@inject AuthStorage AuthStorage
+@inject NavigationManager Navigation
 @inject ICarrinhoService CarrinhoService
 @inject IAuthSession AuthSession
 
@@ -73,6 +76,18 @@
                     <span>Login</span>
                 </NavLink>
             }
+
+	@if (AuthSession.IsAuthenticated)
+{
+    <button
+        type="button"
+        class="nav-link logout-button"
+        @onclick="LogoutAsync">
+        <span class="nav-icon">↪</span>
+        <span>Sair</span>
+    </button>
+}
+
         </div>
     </div>
 </nav>
@@ -97,6 +112,41 @@
     {
         collapseNavMenu = !collapseNavMenu;
     }
+	private async Task LogoutAsync()
+{
+    var refreshToken = AuthSession.RefreshToken;
+
+    try
+    {
+        if (!string.IsNullOrWhiteSpace(refreshToken))
+        {
+            await AuthService.LogoutAsync(
+                refreshToken,
+                AuthSession.Token!);
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Erro ao encerrar sessão no backend: {ex.Message}");
+    }
+    finally
+    {
+        AuthSession.Clear();
+
+        try
+        {
+            await AuthStorage.RemoveAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao limpar armazenamento: {ex.Message}");
+        }
+
+        collapseNavMenu = true;
+
+        Navigation.NavigateTo("/");
+    }
+}
 
     public void Dispose()
     {

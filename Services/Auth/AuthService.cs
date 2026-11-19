@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using System.Net.Http.Headers;
 using Fcg.Web.DTOs.Auth;
 
 namespace Fcg.Web.Services.Auth;
@@ -57,12 +58,26 @@ public sealed class AuthService : IAuthService
 
     public async Task LogoutAsync(
         string refreshToken,
+        string accessToken,
         CancellationToken cancellationToken = default)
     {
-        var request = new RefreshTokenRequestDto(refreshToken);
+        if (string.IsNullOrWhiteSpace(refreshToken))
+            throw new ArgumentException("Refresh Token inválido.", nameof(refreshToken));
 
-        var response = await _httpClient.PostAsJsonAsync(
-            "api/v1/auth/logout",
+        if (string.IsNullOrWhiteSpace(accessToken))
+            throw new ArgumentException("Access Token inválido.", nameof(accessToken));
+
+        using var request = new HttpRequestMessage(
+            HttpMethod.Post,
+            "api/v1/auth/logout");
+
+        request.Headers.Authorization =
+            new AuthenticationHeaderValue("Bearer", accessToken);
+
+        request.Content = JsonContent.Create(
+            new RefreshTokenRequestDto(refreshToken));
+
+        using var response = await _httpClient.SendAsync(
             request,
             cancellationToken);
 

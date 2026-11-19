@@ -73,7 +73,7 @@
         </EditForm>
 
         <div class="login-footer">
-            <span>Ainda n�o possui uma conta?</span>
+            <span>Ainda não possui uma conta?</span>
 
             <a href="/cadastro">Criar conta</a>
         </div>
@@ -118,11 +118,11 @@
         }
         catch (HttpRequestException)
         {
-            _erro = "N�o foi poss�vel conectar ao servidor.";
+            _erro = "Não foi possivel conectar ao servidor.";
         }
         catch
         {
-            _erro = "E-mail ou senha inv�lidos.";
+            _erro = "E-mail ou senha invalidos.";
         }
         finally
         {
@@ -135,7 +135,7 @@
         [System.ComponentModel.DataAnnotations.Required(
             ErrorMessage = "Informe o e-mail.")]
         [System.ComponentModel.DataAnnotations.EmailAddress(
-            ErrorMessage = "Informe um e-mail v�lido.")]
+            ErrorMessage = "Informe um e-mail valido.")]
         public string Email { get; set; } = string.Empty;
 
         [System.ComponentModel.DataAnnotations.Required(

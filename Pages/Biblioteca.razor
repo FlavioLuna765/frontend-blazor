@@ -1,4 +1,4 @@
-﻿@page "/biblioteca"
+@page "/biblioteca"
 
 @using Fcg.Web.DTOs.Catalogo
 @using Fcg.Web.Services.Biblioteca
@@ -63,22 +63,7 @@
             @foreach (var jogo in jogos)
             {
                 <article class="biblioteca-card" @key="jogo.Id">
-                    <div class="biblioteca-card-banner">
-                        @if (!string.IsNullOrWhiteSpace(jogo.ImagemUrl))
-                        {
-                            <img
-                                class="biblioteca-game-image"
-                                src="@jogo.ImagemUrl"
-                                alt="@($"Capa de {jogo.Titulo}")"
-                                loading="lazy" />
-                        }
-                        else
-                        {
-                            <span class="biblioteca-game-icon">🎮</span>
-                        }
-
-                        <span class="biblioteca-badge">ADQUIRIDO</span>
-                    </div>
+                    <div class="biblioteca-card-banner"><span class="biblioteca-game-icon">🎮</span></div>
 
                     <div class="biblioteca-card-body">
                         <h2>@jogo.Titulo</h2>

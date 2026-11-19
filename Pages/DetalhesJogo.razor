@@ -49,23 +49,12 @@
         <button type="button"
                 class="back-button"
                 @onclick="VoltarCatalogo">
-            ← Voltar ao catálogo
+            &#8592; Voltar ao catálogo
         </button>
 
         <section class="game-details-card">
 
-            <div class="game-details-cover">
-                @if (!string.IsNullOrWhiteSpace(_jogo.ImagemUrl))
-                {
-                    <img class="game-details-image"
-                         src="@_jogo.ImagemUrl"
-                         alt="Capa de @_jogo.Titulo" />
-                }
-                else
-                {
-                    <span>🎮</span>
-                }
-            </div>
+            <div class="game-details-cover"><span>🎮</span></div>
 
             <div class="game-details-content">
 
@@ -114,7 +103,7 @@
                                 @onclick="AdicionarAoCarrinho">
                             @if (CarrinhoService.Contem(_jogo.Id))
                             {
-                                <span>✓ No carrinho</span>
+                                <span>? No carrinho</span>
                             }
                             else
                             {
@@ -146,7 +135,7 @@
             @if (!AuthSession.IsAuthenticated)
             {
                 <div class="reviews-login-prompt">
-                    <div class="reviews-prompt-icon">★</div>
+                    <div class="reviews-prompt-icon">?</div>
                     <div>
                         <h3>Entre para ver as avaliações</h3>
                         <p>
@@ -192,7 +181,7 @@
 
                             <div class="reviews-stars-display"
                                  aria-label="Média geral das avaliações">
-                                ★★★★★
+                                ?????
                             </div>
 
                             <span>
@@ -214,7 +203,7 @@
                                         : 0;
 
                                 <div class="rating-row" @key="notaAtual">
-                                    <span>@notaAtual ★</span>
+                                    <span>@notaAtual ?</span>
                                     <div class="rating-bar">
                                         <div class="rating-bar-fill"
                                              style="width: @($"{percentual.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)}%")">
@@ -252,7 +241,7 @@
                                                 aria-label="@($"{notaAtual} estrelas")"
                                                 aria-pressed="@(_notaSelecionada == notaAtual)"
                                                 @onclick="() => SelecionarNota(notaAtual)">
-                                            ★
+                                            ?
                                         </button>
                                     }
                                     <span class="selected-rating">
@@ -324,7 +313,7 @@
                     @if (_avaliacoes.Count == 0)
                     {
                         <div class="reviews-empty">
-                            <span class="reviews-empty-icon">✎</span>
+                            <span class="reviews-empty-icon">?</span>
                             <h3>Ainda não há avaliações</h3>
                             <p>Seja o primeiro a compartilhar sua experiência!</p>
                         </div>
@@ -382,7 +371,7 @@
                                                 class="useful-button"
                                                 disabled="@_votandoIds.Contains(avaliacao.Id)"
                                                 @onclick="() => VotarUtilAsync(avaliacao)">
-                                            <span>👍</span>
+                                            <span>ðŸ‘</span>
                                             Útil (@avaliacao.VotosUteis)
                                         </button>
                                     </div>
@@ -397,7 +386,7 @@
                                         class="pagination-button"
                                         disabled="@(_pagina <= 1 || _carregandoAvaliacoes)"
                                         @onclick="PaginaAnteriorAsync">
-                                    ← Anterior
+                                    &#8592; Anterior
                                 </button>
 
                                 <span>
@@ -408,7 +397,7 @@
                                         class="pagination-button"
                                         disabled="@(_pagina >= TotalPaginas || _carregandoAvaliacoes)"
                                         @onclick="ProximaPaginaAsync">
-                                    Próxima →
+                                    Próxima ?
                                 </button>
                             </div>
                         }

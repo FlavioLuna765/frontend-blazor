@@ -20,7 +20,7 @@
         <div>
             <span class="admin-eyebrow">PAINEL ADMINISTRATIVO</span>
             <h1>Gerenciar jogos</h1>
-            <p>Cadastre, edite e gerencie os jogos disponíveis na FCG Store.</p>
+            <p>Cadastre, edite e gerencie os jogos disponÃ­veis na FCG Store.</p>
         </div>
 
         @if (PodeAcessar)
@@ -39,7 +39,7 @@
     {
         <section class="admin-panel access-denied">
             <h2>Acesso restrito</h2>
-            <p>Esta área está disponível apenas para administradores.</p>
+            <p>Esta área está disponivel apenas para administradores.</p>
             <button class="admin-primary-button" @onclick="VoltarAoCatalogo">
                 Voltar ao catálogo
             </button>
@@ -71,7 +71,7 @@
                     <ValidationSummary />
 
                     <div class="admin-field">
-                        <label for="titulo">Título</label>
+                        <label for="titulo">Titulo</label>
                         <InputText id="titulo"
                                    class="admin-input"
                                    @bind-Value="Formulario.Titulo" />
@@ -133,53 +133,7 @@
                             <ValidationMessage For="@(() => Formulario.DataLancamento)" />
                         }
                     </div>
-
-                    <div class="admin-field">
-                        <label for="imagemUrl">URL da imagem do jogo</label>
-                        <InputText id="imagemUrl"
-                                   class="admin-input"
-                                   type="url"
-                                   placeholder="https://exemplo.com/imagem-do-jogo.jpg"
-                                   Value="@Formulario.ImagemUrl"
-                                   ValueChanged="AoAlterarImagemUrl"
-                                   ValueExpression="@(() => Formulario.ImagemUrl)" />
-                        <small>Informe um endereço público de imagem iniciado por https:// ou http://.</small>
-                        <ValidationMessage For="@(() => Formulario.ImagemUrl)" />
-                    </div>
-
-
-                    <div class="admin-field">
-                        <label for="arquivoImagem">Ou selecione uma imagem do computador</label>
-                        <InputFile id="arquivoImagem"
-                                OnChange="AoSelecionarImagemAsync"
-                                accept="image/png,image/jpeg,image/webp"
-                                disabled="@EnviandoImagem" />
-
-                        <small>Formatos aceitos: PNG, JPEG e WebP. Tamanho máximo: 5 MB.</small>
-
-                        @if (EnviandoImagem)
-                        {
-                            <p>Enviando imagem...</p>
-                        }
-                    </div>
-
-
-
-                    @if (!string.IsNullOrWhiteSpace(Formulario.ImagemUrl) && UrlImagemValida)
-                    {
-                        <div class="admin-image-preview">
-                            <span>Prévia da imagem</span>
-                            <img src="@Formulario.ImagemUrl"
-                                 alt="@($"Prévia da capa de {Formulario.Titulo}")"
-                                 @onerror="ImagemPreviewFalhou" />
-                            @if (ImagemComErro)
-                            {
-                                <p>Não foi possível carregar essa imagem. Confira a URL.</p>
-                            }
-                        </div>
-                    }
-
-                    <div class="admin-form-actions">
+<div class="admin-form-actions">
                         <button class="admin-primary-button"
                                 type="submit"
                                 disabled="@Salvando">
@@ -202,7 +156,7 @@
             <section class="admin-panel">
                 <div class="admin-panel-heading">
                     <div>
-                        <span class="admin-eyebrow">CATÁLOGO</span>
+                        <span class="admin-eyebrow">CATÃLOGO</span>
                         <h2>Jogos cadastrados</h2>
                     </div>
 
@@ -218,7 +172,7 @@
                     <label for="busca">Pesquisar jogos</label>
                     <InputText id="busca"
                                class="admin-input"
-                               placeholder="Digite o título..."
+                               placeholder="Digite o titulo..."
                                @bind-Value="Busca"
                                @bind-Value:event="oninput" />
                 </div>
@@ -237,14 +191,7 @@
                         @foreach (var jogo in JogosFiltrados)
                         {
                             <article class="admin-game-item" @key="jogo.Id">
-                                @if (!string.IsNullOrWhiteSpace(jogo.ImagemUrl))
-                                {
-                                    <img class="admin-game-thumbnail"
-                                         src="@jogo.ImagemUrl"
-                                         alt="@($"Capa de {jogo.Titulo}")" />
-                                }
-
-                                <div class="admin-game-info">
+<div class="admin-game-info">
                                     <h3>@jogo.Titulo</h3>
                                     <p>@NomeGenero(jogo.Genero)</p>
                                     <p>@jogo.Preco.ToString("C", CulturaBrasileira)</p>
@@ -304,8 +251,6 @@
     private bool PodeAcessar;
     private bool Carregando;
     private bool Salvando;
-    private bool ImagemComErro;
-
     private string Busca = string.Empty;
     private string? MensagemSucesso;
     private string? MensagemErro;
@@ -314,13 +259,7 @@
     private JogoResponseDto? JogoEmEdicao;
     private JogoResponseDto? JogoParaDesativar;
     private JogoFormModel Formulario = new();
-    private bool EnviandoImagem;
-
-    private bool UrlImagemValida =>
-        Uri.TryCreate(Formulario.ImagemUrl, UriKind.Absolute, out var uri) &&
-        (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
-
-    private List<JogoResponseDto> JogosFiltrados => Jogos
+private List<JogoResponseDto> JogosFiltrados => Jogos
         .Where(j => string.IsNullOrWhiteSpace(Busca) ||
                     j.Titulo.Contains(Busca.Trim(), StringComparison.OrdinalIgnoreCase))
         .OrderBy(j => j.Titulo)
@@ -357,7 +296,7 @@
         {
             MensagemErro = MensagemHttp(
                 ex,
-                "Não foi possível carregar os jogos. Confira se a API de catálogo está ativa.");
+                "Não foi possivel carregar os jogos. Confira se a API de catálogo está ativa.");
         }
         catch (Exception)
         {
@@ -374,7 +313,6 @@
         JogoEmEdicao = null;
         JogoParaDesativar = null;
         Formulario = new JogoFormModel();
-        ImagemComErro = false;
         MensagemErro = null;
         MensagemSucesso = null;
     }
@@ -383,8 +321,6 @@
     {
         JogoEmEdicao = jogo;
         JogoParaDesativar = null;
-        ImagemComErro = false;
-
         Formulario = new JogoFormModel
         {
             Titulo = jogo.Titulo,
@@ -392,7 +328,6 @@
             Genero = jogo.Genero,
             Preco = jogo.Preco,
             DataLancamento = jogo.DataLancamento,
-            ImagemUrl = jogo.ImagemUrl
         };
 
         MensagemErro = null;
@@ -410,19 +345,14 @@
 
         try
         {
-            var imagemUrl = string.IsNullOrWhiteSpace(Formulario.ImagemUrl)
-                ? null
-                : Formulario.ImagemUrl.Trim();
-
-            if (JogoEmEdicao is null)
+if (JogoEmEdicao is null)
             {
                 var dto = new CriarJogoRequestDto(
                     Formulario.Titulo.Trim(),
                     Formulario.Descricao.Trim(),
                     Formulario.Genero,
                     Formulario.Preco,
-                    Formulario.DataLancamento,
-                    imagemUrl);
+                    Formulario.DataLancamento);
 
                 await AdminJogosService.CriarAsync(dto);
                 MensagemSucesso = "Jogo cadastrado com sucesso.";
@@ -433,8 +363,7 @@
                     Formulario.Titulo.Trim(),
                     Formulario.Descricao.Trim(),
                     Formulario.Genero,
-                    Formulario.Preco,
-                    imagemUrl);
+                    Formulario.Preco);
 
                 await AdminJogosService.AtualizarAsync(JogoEmEdicao.Id, dto);
                 MensagemSucesso = "Jogo atualizado com sucesso.";
@@ -442,12 +371,11 @@
 
             JogoEmEdicao = null;
             Formulario = new JogoFormModel();
-            ImagemComErro = false;
             await CarregarJogosAsync();
         }
         catch (HttpRequestException ex)
         {
-            MensagemErro = MensagemHttp(ex, "Não foi possível salvar o jogo.");
+            MensagemErro = MensagemHttp(ex, "Não foi possivel salvar o jogo.");
         }
         catch (Exception)
         {
@@ -459,53 +387,6 @@
         }
     }
 
-    private Task AoAlterarImagemUrl(string? valor)
-    {
-        Formulario.ImagemUrl = valor;
-        ImagemComErro = false;
-        return Task.CompletedTask;
-    }
-
-private async Task AoSelecionarImagemAsync(InputFileChangeEventArgs e)
-{
-    if (!PodeAcessar || EnviandoImagem)
-        return;
-
-    MensagemErro = null;
-    MensagemSucesso = null;
-    EnviandoImagem = true;
-
-    try
-    {
-        var arquivo = e.File;
-
-        var imagemUrl = await AdminJogosService.UploadImagemAsync(arquivo);
-
-        Formulario.ImagemUrl = imagemUrl;
-        ImagemComErro = false;
-
-        MensagemSucesso = "Imagem enviada com sucesso. Salve o jogo para registrar a alteração.";
-    }
-    catch (HttpRequestException ex)
-    {
-        MensagemErro = MensagemHttp(
-            ex,
-            "Não foi possível enviar a imagem. Confira se a API de catálogo está ativa.");
-    }
-    catch (Exception ex)
-    {
-        MensagemErro = ex.Message;
-    }
-    finally
-    {
-        EnviandoImagem = false;
-    }
-}
-
-    private void ImagemPreviewFalhou()
-    {
-        ImagemComErro = true;
-    }
 
     private void SolicitarDesativacao(JogoResponseDto jogo)
     {
@@ -534,7 +415,7 @@ private async Task AoSelecionarImagemAsync(InputFileChangeEventArgs e)
         }
         catch (HttpRequestException ex)
         {
-            MensagemErro = MensagemHttp(ex, "Não foi possível desativar o jogo.");
+            MensagemErro = MensagemHttp(ex, "Não foi possivel desativar o jogo.");
         }
         catch (Exception)
         {
@@ -581,9 +462,9 @@ private async Task AoSelecionarImagemAsync(InputFileChangeEventArgs e)
 
     private sealed class JogoFormModel
     {
-        [Required(ErrorMessage = "Informe o título.")]
+        [Required(ErrorMessage = "Informe o titulo.")]
         [StringLength(120, MinimumLength = 2,
-            ErrorMessage = "O título deve ter entre 2 e 120 caracteres.")]
+            ErrorMessage = "O titulo deve ter entre 2 e 120 caracteres.")]
         public string Titulo { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Informe a descrição.")]
@@ -600,8 +481,5 @@ private async Task AoSelecionarImagemAsync(InputFileChangeEventArgs e)
 
         [Required(ErrorMessage = "Informe a data de lançamento.")]
         public DateTime DataLancamento { get; set; } = DateTime.Today;
-
-        [Url(ErrorMessage = "Informe uma URL válida para a imagem.")]
-        public string? ImagemUrl { get; set; }
     }
 }

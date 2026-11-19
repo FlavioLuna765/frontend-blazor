@@ -5,5 +5,4 @@ public sealed record CriarJogoRequestDto(
     string Descricao,
     int Genero,
     decimal Preco,
-    DateTime DataLancamento,
-    string? ImagemUrl = null);
+    DateTime DataLancamento);

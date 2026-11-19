@@ -8,5 +8,4 @@ public sealed record JogoResponseDto(
     decimal Preco,
     string Moeda,
     DateTime DataLancamento,
-    bool Ativo,
-    string? ImagemUrl = null);
+    bool Ativo);
