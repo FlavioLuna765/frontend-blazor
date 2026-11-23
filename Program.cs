@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Fcg.Web;
@@ -17,32 +16,35 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-// Cliente HTTP padrão: API de autenticação.
+// ✅ Lê as URLs do appsettings.json (sem hardcode)
+var authBaseUrl = builder.Configuration["Api:AuthBaseUrl"]
+    ?? throw new InvalidOperationException("Api:AuthBaseUrl não configurado no appsettings.json");
+
+var catalogBaseUrl = builder.Configuration["Api:CatalogBaseUrl"]
+    ?? throw new InvalidOperationException("Api:CatalogBaseUrl não configurado no appsettings.json");
+
+// Cliente HTTP padrão: API de autenticação (users-api)
 builder.Services.AddScoped(sp =>
     new HttpClient
     {
-        BaseAddress = new Uri("http://localhost:8081/")
+        BaseAddress = new Uri(authBaseUrl)
     });
 
-// Autenticação e sessão.
+// Autenticação e sessão
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAuthSession, AuthSession>();
 builder.Services.AddScoped<AuthStorage>();
 builder.Services.AddScoped<AuthSessionInitializer>();
 
-// Carrinho e usuário.
+// Carrinho e usuário
 builder.Services.AddScoped<ICarrinhoService, CarrinhoService>();
 builder.Services.AddScoped<ICadastroUsuarioService, CadastroUsuarioService>();
 builder.Services.AddScoped<IUsuarioAtualService, UsuarioAtualService>();
 
-// Handler JWT.
+// Handler JWT
 builder.Services.AddScoped<JwtAuthorizationHandler>();
 
-
-// Cliente compartilhado da Catalog API.
-
-
-// Perfil.
+// Perfil (users-api)
 builder.Services.AddScoped<IPerfilService>(sp =>
 {
     var authSession = sp.GetRequiredService<IAuthSession>();
@@ -54,13 +56,13 @@ builder.Services.AddScoped<IPerfilService>(sp =>
 
     var httpClient = new HttpClient(handler)
     {
-        BaseAddress = new Uri("http://localhost:8081/")
+        BaseAddress = new Uri(authBaseUrl)
     };
 
     return new PerfilService(httpClient);
 });
 
-// Catálogo.
+// Catálogo (catalog-api)
 builder.Services.AddScoped<ICatalogoService>(sp =>
 {
     var authSession = sp.GetRequiredService<IAuthSession>();
@@ -72,13 +74,13 @@ builder.Services.AddScoped<ICatalogoService>(sp =>
 
     var httpClient = new HttpClient(handler)
     {
-        BaseAddress = new Uri("http://localhost:8082/")
+        BaseAddress = new Uri(catalogBaseUrl)
     };
 
     return new CatalogoService(httpClient);
 });
 
-// Avaliações.
+// Avaliações (catalog-api)
 builder.Services.AddScoped<IAvaliacaoService>(sp =>
 {
     var authSession = sp.GetRequiredService<IAuthSession>();
@@ -90,13 +92,13 @@ builder.Services.AddScoped<IAvaliacaoService>(sp =>
 
     var httpClient = new HttpClient(handler)
     {
-        BaseAddress = new Uri("http://localhost:8082/")
+        BaseAddress = new Uri(catalogBaseUrl)
     };
 
     return new AvaliacaoService(httpClient);
 });
 
-// Checkout: utiliza exclusivamente o Catálogo (8082).
+// Checkout (catalog-api)
 builder.Services.AddScoped<ICheckoutService>(sp =>
 {
     var authSession = sp.GetRequiredService<IAuthSession>();
@@ -108,13 +110,13 @@ builder.Services.AddScoped<ICheckoutService>(sp =>
 
     var httpClient = new HttpClient(handler)
     {
-        BaseAddress = new Uri("http://localhost:8082/")
+        BaseAddress = new Uri(catalogBaseUrl)
     };
 
     return new CheckoutService(httpClient);
 });
 
-// Biblioteca.
+// Biblioteca (catalog-api)
 builder.Services.AddScoped<IBibliotecaService>(sp =>
 {
     var authSession = sp.GetRequiredService<IAuthSession>();
@@ -126,13 +128,13 @@ builder.Services.AddScoped<IBibliotecaService>(sp =>
 
     var httpClient = new HttpClient(handler)
     {
-        BaseAddress = new Uri("http://localhost:8082/")
+        BaseAddress = new Uri(catalogBaseUrl)
     };
 
     return new BibliotecaService(httpClient);
 });
 
-// Administração de jogos.
+// Administração de jogos (catalog-api)
 builder.Services.AddScoped<IAdminJogosService>(sp =>
 {
     var authSession = sp.GetRequiredService<IAuthSession>();
@@ -144,7 +146,7 @@ builder.Services.AddScoped<IAdminJogosService>(sp =>
 
     var httpClient = new HttpClient(handler)
     {
-        BaseAddress = new Uri("http://localhost:8082/")
+        BaseAddress = new Uri(catalogBaseUrl)
     };
 
     return new AdminJogosService(httpClient);
@@ -152,7 +154,7 @@ builder.Services.AddScoped<IAdminJogosService>(sp =>
 
 var host = builder.Build();
 
-// Inicialização da sessão de autenticação.
+// Inicialização da sessão de autenticação
 var authSessionInitializer =
     host.Services.GetRequiredService<AuthSessionInitializer>();
 
